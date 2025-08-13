@@ -1,5 +1,4 @@
 <?php
-// *** הגדרות ראשוניות ***
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
@@ -10,12 +9,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-// *** קבלת נתונים ***
 $data = json_decode(file_get_contents("php://input"), true);
 $username = $data["username"] ?? "";
 $honeypot = $data["honeypot"] ?? "";
 
-// *** בדיקות בסיסיות ***
 if ($honeypot !== "") {
     echo json_encode(["success" => false, "message" => "Bot detected"]);
     exit;
@@ -25,9 +22,8 @@ if (!$username) {
     exit;
 }
 
-// *** מגבלות שליחה ***
 $now = time();
-$log_file = "otp_times.json"; // עבור מעקב מגבלות תדירות
+$log_file = "otp_times.json";
 $logs = file_exists($log_file) ? json_decode(file_get_contents($log_file), true) : [];
 $user_logs = $logs[$username] ?? [];
 
@@ -48,10 +44,8 @@ $user_logs = $logs[$username] ?? [];
 //     exit;
 // }
 
-// *** יצירת קוד ***
 $otp = strval(rand(100000, 999999));
 
-// *** שמירת OTP לקובץ ***
 $otp_file = "otp_log.json";
 $otp_data = file_exists($otp_file) ? json_decode(file_get_contents($otp_file), true) : [];
 $otp_data[$username] = [
@@ -60,7 +54,6 @@ $otp_data[$username] = [
 ];
 file_put_contents($otp_file, json_encode($otp_data, JSON_PRETTY_PRINT));
 
-// *** שליחת מייל דרך Brevo ***
 $apiKey = "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"; // החלף ב־API KEY שלך
 
 $ch = curl_init();
@@ -86,12 +79,10 @@ $response = curl_exec($ch);
 $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 curl_close($ch);
 
-// *** שמירת זמן השליחה ללוג נוסף ***
 $user_logs[] = date("Y-m-d H:i:s", $now);
 $logs[$username] = $user_logs;
 file_put_contents($log_file, json_encode($logs, JSON_PRETTY_PRINT));
 
-// *** תגובה ל־Frontend ***
 if ($httpCode >= 200 && $httpCode < 300) {
     echo json_encode(["success" => true, "message" => "OTP sent"]);
 } else {
