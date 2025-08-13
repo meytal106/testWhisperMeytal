@@ -27,22 +27,22 @@ $log_file = "otp_times.json";
 $logs = file_exists($log_file) ? json_decode(file_get_contents($log_file), true) : [];
 $user_logs = $logs[$username] ?? [];
 
-// $within_30_sec = array_filter($user_logs, fn($t) => $now - strtotime($t) < 30);
-// $within_1_hour = array_filter($user_logs, fn($t) => $now - strtotime($t) < 3600);
-// $within_today = array_filter($user_logs, fn($t) => date("Y-m-d", strtotime($t)) === date("Y-m-d", $now));
+$within_30_sec = array_filter($user_logs, fn($t) => $now - strtotime($t) < 30);
+$within_1_hour = array_filter($user_logs, fn($t) => $now - strtotime($t) < 3600);
+$within_today = array_filter($user_logs, fn($t) => date("Y-m-d", strtotime($t)) === date("Y-m-d", $now));
 
-// if (count($within_30_sec) > 0) {
-//     echo json_encode(["success" => false, "message" => "Please wait 30 seconds before requesting again."]);
-//     exit;
-// }
-// if (count($within_1_hour) >= 4) {
-//     echo json_encode(["success" => false, "message" => "Hourly limit (4) exceeded."]);
-//     exit;
-// }
-// if (count($within_today) >= 10) {
-//     echo json_encode(["success" => false, "message" => "Daily limit (10) exceeded."]);
-//     exit;
-// }
+if (count($within_30_sec) > 0) {
+    echo json_encode(["success" => false, "message" => "Please wait 30 seconds before requesting again."]);
+    exit;
+}
+if (count($within_1_hour) >= 4) {
+    echo json_encode(["success" => false, "message" => "Hourly limit (4) exceeded."]);
+    exit;
+}
+if (count($within_today) >= 10) {
+    echo json_encode(["success" => false, "message" => "Daily limit (10) exceeded."]);
+    exit;
+}
 
 $otp = strval(rand(100000, 999999));
 
